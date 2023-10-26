@@ -222,6 +222,8 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
     }
 
     public static final String CUSTOM_DOR_PROPERTY_WRAPPER = "fd:dor";
+
+    public static final String CUSTOM_SIGNER_PROPERTY_WRAPPER = "fd:signerInfo";
     // used for DOR and SPA editor to work
     public static final String CUSTOM_JCR_PATH_PROPERTY_WRAPPER = "fd:path";
 
@@ -247,13 +249,18 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
         if (getCustomLayoutProperties().size() != 0) {
             properties.put(CUSTOM_PROPERTY_WRAPPER, getCustomLayoutProperties());
         }
-        if (getDorProperties().size() > 0) {
-            properties.put(CUSTOM_DOR_PROPERTY_WRAPPER, getDorProperties());
+        Map<String, Object> dorProperties = getDorProperties();
+        if (dorProperties.size() > 0) {
+            properties.put(CUSTOM_DOR_PROPERTY_WRAPPER, dorProperties);
         }
         properties.put(CUSTOM_JCR_PATH_PROPERTY_WRAPPER, getPath());
         Map<String, Object> rulesProperties = getRulesProperties();
         if (rulesProperties.size() > 0) {
             properties.put(CUSTOM_RULE_PROPERTY_WRAPPER, rulesProperties);
+        }
+        Map<String, Object> signerProperties = getSignerProperties();
+        if (signerProperties.size() > 0) {
+            properties.put(CUSTOM_SIGNER_PROPERTY_WRAPPER, signerProperties);
         }
         return properties;
     }

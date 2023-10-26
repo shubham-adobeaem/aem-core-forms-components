@@ -21,7 +21,7 @@
      * @param {Object} component The component that has to be instantiated
      */
     window.CQ.FormsCoreComponents.editorhooks.viewQualifiedName = function (component) {
-        author.afUtils.getQualifiedName(component).then(function (componentQualifiedName) {
+        author.afUtils.getQualifiedName(component.path).then(function (componentQualifiedName) {
             const localisedQualifiedNameMessage = CQ.I18n.getMessage('Qualified Name');
             const localizedWaringMessageForQualifiedName = CQ.I18n.getMessage("A Qualified Name is based on the position of the component. It changes if a component is moved.");
             const dialog = new Coral.Dialog().set({
