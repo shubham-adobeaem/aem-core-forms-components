@@ -13,17 +13,12 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/* global jQuery */
 (function($) {
     "use strict";
 
-    var selectors = {
-            dialogContent: ".cmp-adaptiveform-dynamiccontainer__editdialog"
-        };
+    var EDIT_DIALOG = ".cmp-adaptiveform-dynamiccontainer__editdialog",
+        Utils = window.CQ.FormsCoreComponents.Utils.v1;
 
-    $(document).on("dialog-loaded", function(e) {
-
-    });
-
+    Utils.initializeEditDialog(EDIT_DIALOG)();
 
 })(jQuery);
