@@ -87,6 +87,24 @@
             formModel.importModel(this._model, jsonNew);
         }
 
+        getDynamicItemJson(url, callback) {
+            let xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        // If the request is successful (status code 200), pass the response to the callback function
+                        callback(null, xhr.responseText);
+                    } else {
+                        // If there's an error, pass the error information to the callback function
+                        callback(new Error('Request failed with status: ' + xhr.status), null);
+                    }
+                }
+            };
+
+            xhr.open('GET', url, true);
+            xhr.send();
+        }
+
         updateAppendDynamicItems(a, b){
             a.items.forEach(item => {
                 super.addChild(item);
