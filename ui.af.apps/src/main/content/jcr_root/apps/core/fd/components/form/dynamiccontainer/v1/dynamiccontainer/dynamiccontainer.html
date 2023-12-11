@@ -35,7 +35,7 @@
             <div data-sly-call="${label.label @componentId=dynamiccontainer.id, labelValue=label.label.value, labelVisible=label.label.visible, bemBlock='cmp-adaptiveform-dynamiccontainer'}" data-sly-unwrap></div>
             <div data-sly-call="${questionMark.questionMark @componentId=dynamiccontainer.id, longDescription=dynamiccontainer.description, bemBlock='cmp-adaptiveform-dynamiccontainer'}" data-sly-unwrap></div>
         </div>
-        <div class="cmp-adaptiveform-dynamiccontainer__content" ref="${dynamiccontainer.dataModelRef}"></div>
+        <div class="cmp-adaptiveform-dynamiccontainer__content"></div>
         <div data-sly-call="${shortDescription.shortDescription @componentId=dynamiccontainer.id, shortDescriptionVisible=dynamiccontainer.tooltipVisible, shortDescription=dynamiccontainer.tooltip, bemBlock='cmp-adaptiveform-dynamiccontainer'}" data-sly-unwrap></div>
         <div data-sly-call="${longDescription.longDescription @componentId=dynamiccontainer.id, longDescription=dynamiccontainer.description, bemBlock='cmp-adaptiveform-dynamiccontainer'}" data-sly-unwrap></div>
     </div>

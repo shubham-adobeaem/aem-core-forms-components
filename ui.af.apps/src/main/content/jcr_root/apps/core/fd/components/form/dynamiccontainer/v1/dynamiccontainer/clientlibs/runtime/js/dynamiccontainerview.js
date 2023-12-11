@@ -74,7 +74,23 @@
             this.children.splice(this.children.indexOf(removedInstanceView), 1);
         }
 
-        updateAppendDynamicItems(){
+        setModel(model) {
+            super.setModel(model);
+            let formModel = guideBridge.getFormModel();
+            let jsonNew = this.getDynamicItemJson(this._model._jsonModel.dataModelRef, function(error, response) {
+                if (error) {
+                    console.error('Error:', error);
+                } else {
+                    console.log('Response:', response);
+                }
+            });
+            formModel.importModel(this._model, jsonNew);
+        }
+
+        updateAppendDynamicItems(a, b){
+            a.items.forEach(item => {
+                super.addChild(item);
+            })
         }
     }
 
