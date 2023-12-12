@@ -74,35 +74,58 @@
             this.children.splice(this.children.indexOf(removedInstanceView), 1);
         }
 
-        setModel(model) {
-            super.setModel(model);
-            let formModel = guideBridge.getFormModel();
-            let jsonNew = this.getDynamicItemJson(this._model._jsonModel.dataModelRef, function(error, response) {
-                if (error) {
-                    console.error('Error:', error);
-                } else {
-                    console.log('Response:', response);
-                }
-            });
-            formModel.importModel(this._model, jsonNew);
-        }
-
-        getDynamicItemJson(url, callback) {
+        #getDynamicItemJson(url, callback) {
             let xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
                         // If the request is successful (status code 200), pass the response to the callback function
-                        callback(null, xhr.responseText);
+                        callback(null, JSON.parse(xhr.responseText));
                     } else {
                         // If there's an error, pass the error information to the callback function
                         callback(new Error('Request failed with status: ' + xhr.status), null);
                     }
                 }
             };
-
             xhr.open('GET', url, true);
             xhr.send();
+        }
+
+        #injectHTML(json) {
+            // fetch html from html provider servlet
+            let data = { "modelJSON" : JSON.stringify(json) };
+            const params = new URLSearchParams(data).toString();
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', this._model.properties['fd:path'] + '.af.generate.html?' + params, true);
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Parse the JSON response
+                    var response = xhr.responseText;
+                    console.log(response);
+                } else {
+                    console.error('Request failed with status:', xhr.status);
+                }
+            };
+
+            xhr.send();
+        }
+
+        async setModel(model) {
+            super.setModel(model);
+            let formModel = guideBridge.getFormModel();
+            let jsonModel = await new Promise((resolve, reject) => {
+                this.#getDynamicItemJson(this._model._jsonModel.dataModelRef, function (error, response) {
+                    if (error) {
+                        console.error('Error:', error);
+                        reject(error);
+                    } else {
+                        console.log('Response:', response);
+                        resolve(response);
+                    }
+                });
+            })
+            formModel.importModel(this._model, jsonModel);
+            await this.#injectHTML(jsonModel);
         }
 
         updateAppendDynamicItems(a, b){
