@@ -74,15 +74,13 @@
             this.children.splice(this.children.indexOf(removedInstanceView), 1);
         }
 
-        #getDynamicItemJson(url, callback) {
+        #executeGETCall(url, callback) {
             let xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        // If the request is successful (status code 200), pass the response to the callback function
-                        callback(null, JSON.parse(xhr.responseText));
+                        callback(null, xhr.responseText);
                     } else {
-                        // If there's an error, pass the error information to the callback function
                         callback(new Error('Request failed with status: ' + xhr.status), null);
                     }
                 }
@@ -91,30 +89,9 @@
             xhr.send();
         }
 
-        #injectHTML(json) {
-            // fetch html from html provider servlet
-            let data = { "modelJSON" : JSON.stringify(json) };
-            const params = new URLSearchParams(data).toString();
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', this._model.properties['fd:path'] + '.af.generate.html?' + params, true);
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    // Parse the JSON response
-                    var response = xhr.responseText;
-                    console.log(response);
-                } else {
-                    console.error('Request failed with status:', xhr.status);
-                }
-            };
-
-            xhr.send();
-        }
-
-        async setModel(model) {
-            super.setModel(model);
-            let formModel = guideBridge.getFormModel();
-            let jsonModel = await new Promise((resolve, reject) => {
-                this.#getDynamicItemJson(this._model._jsonModel.dataModelRef, function (error, response) {
+        #fetchData(url) {
+            return new Promise((resolve, reject) => {
+                this.#executeGETCall(url, (error, response) => {
                     if (error) {
                         console.error('Error:', error);
                         reject(error);
@@ -122,16 +99,38 @@
                         console.log('Response:', response);
                         resolve(response);
                     }
-                });
+                })
             })
-            formModel.importModel(this._model, jsonModel);
-            await this.#injectHTML(jsonModel);
         }
 
-        updateAppendDynamicItems(a, b){
-            a.items.forEach(item => {
-                super.addChild(item);
-            })
+        async #stitchHTMLInDOM(json) {
+            let data = { "modelJSON" : json };
+            const params = new URLSearchParams(data).toString();
+            const html = await this.#fetchData(this._model.properties['fd:path'] + '.af.generate.html?' + params); // fetch html from server
+            const container = document.createElement('div');
+            container.innerHTML = html;
+            document.querySelector(DynamicContainer.selectors.self).appendChild(container.firstElementChild);
+        }
+
+        #createChildView(model) {
+            const id = model.id; //how to create view from Model??
+        }
+
+        async setActive() {
+            let jsonModel = await this.#fetchData(this._model._jsonModel.dataModelRef);
+            await this.#stitchHTMLInDOM(jsonModel); // stitching the html
+            formModel.importModel(this._model, JSON.parse(jsonModel)); // updating the model
+        }
+
+        setModel(model) {
+            super.setModel(model);
+        }
+
+        updateAppendDynamicItems(dynamicPanelView, dynamicPanelModel){
+            dynamicPanelModel.items.forEach((model) => {
+                let childView = this.#createChildView(model);
+                super.addChild(childView);
+            });
         }
     }
 
