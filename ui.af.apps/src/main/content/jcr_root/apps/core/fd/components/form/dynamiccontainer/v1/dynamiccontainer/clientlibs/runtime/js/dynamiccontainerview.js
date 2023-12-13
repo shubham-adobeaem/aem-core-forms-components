@@ -136,10 +136,6 @@
 
         updateAppendDynamicItems(dynamicPanelView, dynamicPanelModel){
             FormView.Utils.createViewAndRegisterMutationObservers(this.html , this.formContainer);
-            // dynamicPanelModel.items.forEach((model) => {
-            //     let childView = this.#createChildView(model);
-            //     super.addChild(childView);
-            // });
         }
     }
 
