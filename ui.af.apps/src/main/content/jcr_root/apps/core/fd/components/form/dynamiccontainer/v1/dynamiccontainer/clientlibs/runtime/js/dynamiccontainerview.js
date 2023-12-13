@@ -25,8 +25,11 @@
             label: `.${DynamicContainer.bemBlock}__label`,
             description: `.${DynamicContainer.bemBlock}__longdescription`,
             qm: `.${DynamicContainer.bemBlock}__questionmark`,
-            tooltipDiv: `.${DynamicContainer.bemBlock}__shortdescription`
+            tooltipDiv: `.${DynamicContainer.bemBlock}__shortdescription`,
+            content: `.${DynamicContainer.bemBlock}__content`
         };
+
+        html = null;
 
         constructor(params) {
             super(params);
@@ -89,7 +92,7 @@
             xhr.send();
         }
 
-        #fetchData(url) {
+        async #fetchData(url) {
             return new Promise((resolve, reject) => {
                 this.#executeGETCall(url, (error, response) => {
                     if (error) {
@@ -109,17 +112,22 @@
             const html = await this.#fetchData(this._model.properties['fd:path'] + '.af.generate.html?' + params); // fetch html from server
             const container = document.createElement('div');
             container.innerHTML = html;
-            document.querySelector(DynamicContainer.selectors.self).appendChild(container.firstElementChild);
+            let finalHTML = container.children[0];
+            document.querySelector(DynamicContainer.selectors.content).appendChild(finalHTML);
+            return finalHTML;
         }
 
         #createChildView(model) {
             const id = model.id; //how to create view from Model??
+            let element = document.getElementById(id);
         }
 
         async setActive() {
-            let jsonModel = await this.#fetchData(this._model._jsonModel.dataModelRef);
-            await this.#stitchHTMLInDOM(jsonModel); // stitching the html
-            formModel.importModel(this._model, JSON.parse(jsonModel)); // updating the model
+            if(document.querySelector(DynamicContainer.selectors.content).childElementCount === 0) { //fetch the json only if content is empty
+                let jsonModel = await this.#fetchData(this._model._jsonModel.dataModelRef);
+                this.html = await this.#stitchHTMLInDOM(jsonModel); // stitching the html
+                this.formContainer._model.importModel(this._model, JSON.parse(jsonModel)); // updating the model
+            }
         }
 
         setModel(model) {
@@ -127,10 +135,11 @@
         }
 
         updateAppendDynamicItems(dynamicPanelView, dynamicPanelModel){
-            dynamicPanelModel.items.forEach((model) => {
-                let childView = this.#createChildView(model);
-                super.addChild(childView);
-            });
+            FormView.Utils.createViewAndRegisterMutationObservers(this.html , this.formContainer);
+            // dynamicPanelModel.items.forEach((model) => {
+            //     let childView = this.#createChildView(model);
+            //     super.addChild(childView);
+            // });
         }
     }
 
