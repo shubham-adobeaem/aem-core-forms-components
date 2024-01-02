@@ -31,6 +31,8 @@
 
         html = null;
 
+        visited = false;
+
         constructor(params) {
             super(params);
         }
@@ -107,23 +109,21 @@
         }
 
         async #stitchHTMLInDOM(json) {
-            let data = { "modelJSON" : json };
-            const params = new URLSearchParams(data).toString();
-            const html = await this.#fetchData(this._model.properties['fd:path'] + '.af.generate.html?' + params); // fetch html from server
-            const container = document.createElement('div');
-            container.innerHTML = html;
-            let finalHTML = container.children[0];
-            document.querySelector(DynamicContainer.selectors.content).appendChild(finalHTML);
-            return finalHTML;
-        }
-
-        #createChildView(model) {
-            const id = model.id; //how to create view from Model??
-            let element = document.getElementById(id);
+            if(document.getElementById(this.id).querySelector(DynamicContainer.selectors.content).childElementCount === 0) {
+                let data = { "modelJSON" : json };
+                const params = new URLSearchParams(data).toString();
+                const html = await this.#fetchData(this._model.properties['fd:path'] + '.af.generate.html?' + params); // fetch html from server
+                const container = document.createElement('div');
+                container.innerHTML = html;
+                let finalHTML = container.children[0];
+                document.getElementById(this.id).querySelector(DynamicContainer.selectors.content).appendChild(finalHTML);
+                return finalHTML;
+            }
         }
 
         async setActive() {
-            if(document.querySelector(DynamicContainer.selectors.content).childElementCount === 0) { //fetch the json only if content is empty
+            if(document.getElementById(this.id).querySelector(DynamicContainer.selectors.content).childElementCount === 0 && this.visited === false) { //fetch the json only if content is empty
+                this.visited = true;
                 let jsonModel = await this.#fetchData(this._model._jsonModel.dataModelRef);
                 this.html = await this.#stitchHTMLInDOM(jsonModel); // stitching the html
                 this.formContainer._model.importModel(this._model, JSON.parse(jsonModel)); // updating the model
@@ -134,7 +134,7 @@
             super.setModel(model);
         }
 
-        updateAppendDynamicItems(dynamicPanelView, dynamicPanelModel){
+        updateAppendDynamicItems(dynamicPanelView, dynamicPanelModel) {
             FormView.Utils.createViewAndRegisterMutationObservers(this.html , this.formContainer);
         }
     }
